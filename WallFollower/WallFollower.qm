@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="4.0.0" links="0">
+ <framework name="qpc"/>
+ <package name="AOs" stereotype="0x02">
+  <class name="System" superclass="qpc::QActive">
+   <attribute name="LEDToggleEvt" type="QTimeEvt" visibility="0x00" properties="0x00"/>
+   <operation name="ctor" type="void" visibility="0x00" properties="0x01">
+    <code>System* me = (System*)AO_System;
+QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;System_initial));
+QTimeEvt_ctorX(&amp;me-&gt;LEDToggleEvt, &amp;me-&gt;super, LED_TOGGLE_SIG, 0U);</code>
+   </operation>
+   <statechart>
+    <initial target="../1">
+     <action>QTimeEvt_armX(&amp;me-&gt;LEDToggleEvt, 500, 500);</action>
+     <initial_glyph conn="7,2,5,0,25,6">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="Active">
+     <tran trig="LED_TOGGLE">
+      <action brief="Toggle LED">HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);</action>
+      <tran_glyph conn="13,24,3,-1,14">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="13,8,101,57"/>
+    </state>
+    <state_diagram size="118,68"/>
+   </statechart>
+  </class>
+ </package>
+ <package name="Events" stereotype="0x01"/>
+ <directory name="Inc">
+  <file name="system.h">
+   <text>#ifndef SYSTEM_H
+#define SYSTEM_H
+
+#include &quot;signals.h&quot;
+
+extern QActive *AO_System;
+
+$declare(AOs::System)
+
+#endif</text>
+  </file>
+  <file name="signals.h">
+   <text>#ifndef SIGNALS_H
+#define SIGNALS_H
+
+#include &quot;qpc.h&quot;
+
+enum Signals
+{
+    LED_TOGGLE_SIG = Q_USER_SIG,
+    MAX_SIG
+};
+
+#endif</text>
+  </file>
+ </directory>
+ <directory name="Src">
+  <file name="system.c">
+   <text>#include &quot;system.h&quot;
+#include &quot;stm32f4xx_hal.h&quot;
+
+static System l_system;
+QActive* AO_System = &amp;l_system.super;
+
+$define(AOs::System)</text>
+  </file>
+ </directory>
+</model>
