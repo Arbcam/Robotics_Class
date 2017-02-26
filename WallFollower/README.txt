@@ -13,3 +13,5 @@ When making changes to initialization or peripherals, please use STM32CubeMX, an
 When making chnages to behavior, please use the quantum leaps state machine framework.
 
 Some, but very little initialization may need to be done in AtollicTrueStudio, but be careful when doing so, and only code in marked sections of STM32Cube Code, and make any code changes relevant to quantum leaps only within the quantum leaps model.
+
+Do not commit any changes to .metadata
