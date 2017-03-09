@@ -9,10 +9,12 @@
   <item name="backups">0</item>
  </group>
  <group name="windows">
-  <item id="AOs::System::SM">0,0,640,480</item>
-  <item id="Inc::system.h">432,366,674,300</item>
-  <item id="Src::system.c">0,0,1106,666,*</item>
-  <item id="Inc::signals.h">0,366,674,300</item>
+  <item id="AOs::System::SM">0,0,1106,666</item>
+  <item id="Inc::system.h">0,394,674,300</item>
+  <item id="Src::system.c">0,28,1106,666</item>
+  <item id="Inc::signals.h">0,0,674,300</item>
+  <item id="Inc::reflectancesensor.h">0,0,965,666,*</item>
+  <item id="Src::reflectancesensor.c">475,0,674,300</item>
  </group>
  <group name="search">
   <item name="options">2032128</item>

@@ -17,9 +17,8 @@
 /*${Src::system.c} .........................................................*/
 #include "system.h"
 #include "stm32f4xx_hal.h"
-
-static System l_system;
-QActive* AO_System = &l_system.super;
+#include "usart.h"
+#include "string.h"
 
 
 #if ((QP_VERSION < 580) || (QP_VERSION != ((QP_RELEASE^4294967295U) % 0x3E8)))
@@ -28,14 +27,14 @@ QActive* AO_System = &l_system.super;
 
 /*${AOs::System} ...........................................................*/
 /*${AOs::System::ctor} .....................................................*/
-void System_ctor(void) {
-    System* me = (System*)AO_System;
+void System_ctor(System* me) {
     QActive_ctor(&me->super, Q_STATE_CAST(&System_initial));
     QTimeEvt_ctorX(&me->LEDToggleEvt, &me->super, LED_TOGGLE_SIG, 0U);
 }
 /*${AOs::System::SM} .......................................................*/
 QState System_initial(System * const me, QEvt const * const e) {
     /* ${AOs::System::SM::initial} */
+    HAL_UART_Transmit(&huart2, (uint8_t*)"System Startup", strlen("System Startup"), HAL_MAX_DELAY);
     QTimeEvt_armX(&me->LEDToggleEvt, 500, 500);
     return Q_TRAN(&System_Active);
 }

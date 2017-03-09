@@ -5,28 +5,55 @@
   <class name="System" superclass="qpc::QActive">
    <attribute name="LEDToggleEvt" type="QTimeEvt" visibility="0x00" properties="0x00"/>
    <operation name="ctor" type="void" visibility="0x00" properties="0x01">
-    <code>System* me = (System*)AO_System;
-QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;System_initial));
+    <parameter name="me" type="System*"/>
+    <code>QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;System_initial));
 QTimeEvt_ctorX(&amp;me-&gt;LEDToggleEvt, &amp;me-&gt;super, LED_TOGGLE_SIG, 0U);</code>
    </operation>
    <statechart>
     <initial target="../1">
-     <action>QTimeEvt_armX(&amp;me-&gt;LEDToggleEvt, 500, 500);</action>
-     <initial_glyph conn="7,2,5,0,25,6">
+     <action>HAL_UART_Transmit(&amp;huart2, (uint8_t*)&quot;System Startup&quot;, strlen(&quot;System Startup&quot;), HAL_MAX_DELAY);
+QTimeEvt_armX(&amp;me-&gt;LEDToggleEvt, 500, 500);</action>
+     <initial_glyph conn="7,2,5,0,26,3">
       <action box="0,-2,10,2"/>
      </initial_glyph>
     </initial>
     <state name="Active">
      <tran trig="LED_TOGGLE">
       <action brief="Toggle LED">HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);</action>
-      <tran_glyph conn="13,24,3,-1,14">
-       <action box="0,-2,10,2"/>
+      <tran_glyph conn="14,21,3,-1,15">
+       <action box="0,-5,10,2"/>
       </tran_glyph>
      </tran>
-     <state_glyph node="13,8,101,57"/>
+     <state_glyph node="14,5,101,57"/>
     </state>
-    <state_diagram size="118,68"/>
+    <state_diagram size="120,68"/>
    </statechart>
+  </class>
+  <class name="ReflectanceSensor">
+   <attribute name="adcHandle" type="ADC_HandleTypeDef*" visibility="0x02" properties="0x00"/>
+   <attribute name="adcChannel" type="uint32_t" visibility="0x02" properties="0x00"/>
+   <operation name="ctor" type="void" visibility="0x00" properties="0x00">
+    <parameter name="adcHandle" type="ADC_HandleTypeDef*"/>
+    <parameter name="adcChannel" type="uint32_t"/>
+    <code>me-&gt;adcHandle = adcHandle;
+me-&gt;adcChannel = adcChannel;</code>
+   </operation>
+   <operation name="read" type="uint16_t" visibility="0x00" properties="0x00">
+    <code>ADC_ChannelConfTypeDef channelConfig;
+uint16_t ret;
+
+channelConfig.Channel = me-&gt;adcChannel;
+channelConfig.Rank = 1;
+channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+
+HAL_ADC_ConfigChannel(me-&gt;adcHandle, &amp;channelConfig);
+
+HAL_ADC_Start(me-&gt;adcHandle);
+ret = HAL_ADC_PollForConversion(me-&gt;adcHandle, HAL_MAX_DELAY);
+HAL_ADC_Stop(me-&gt;adcHandle);
+
+return ret;</code>
+   </operation>
   </class>
  </package>
  <package name="Events" stereotype="0x01"/>
@@ -36,8 +63,6 @@ QTimeEvt_ctorX(&amp;me-&gt;LEDToggleEvt, &amp;me-&gt;super, LED_TOGGLE_SIG, 0U);
 #define SYSTEM_H
 
 #include &quot;signals.h&quot;
-
-extern QActive *AO_System;
 
 $declare(AOs::System)
 
@@ -57,16 +82,31 @@ enum Signals
 
 #endif</text>
   </file>
+  <file name="reflectancesensor.h">
+   <text>#ifndef REFLECTANCESENSOR_H
+#define REFLECTANCESENSOR_H
+
+#include &quot;qpc.h&quot;
+#include &quot;adc.h&quot;
+
+$declare(AOs::ReflectanceSensor)
+
+#endif</text>
+  </file>
  </directory>
  <directory name="Src">
   <file name="system.c">
    <text>#include &quot;system.h&quot;
 #include &quot;stm32f4xx_hal.h&quot;
-
-static System l_system;
-QActive* AO_System = &amp;l_system.super;
+#include &quot;usart.h&quot;
+#include &quot;string.h&quot;
 
 $define(AOs::System)</text>
+  </file>
+  <file name="reflectancesensor.c">
+   <text>#include &quot;reflectancesensor.h&quot;
+
+$define(AOs::ReflectanceSensor)</text>
   </file>
  </directory>
 </model>
